@@ -1,0 +1,42 @@
+#!/usr/bin/php
+<?php
+
+$pathToNetbeansBinary = '/home/robo47/netbeans-7.0/bin/netbeans';
+
+
+if (!file_exists($pathToNetbeansBinary)) {
+  throw new \Exception('Netbeans binary not found in "'.$pathToNetbeansBinary.'"');
+}
+
+if (!is_executable($pathToNetbeansBinary)) {
+  throw new \Exception('Netbeans binary not executeable: "'.$pathToNetbeansBinary.'"');
+}
+
+if (!isset($_SERVER['argc'])) {
+  throw new \Exception('Missing $_SERVER[\'argc\']');
+}
+
+if ($_SERVER['argc'] != 2) {
+    throw new \Exception('Invalid value for $_SERVER[\'argc\']: ' . $_SERVER['argc']);
+}
+
+$fileparam = $_SERVER['argv'][1];
+
+$pos = strpos($fileparam, ':');
+$line = null;
+
+$file = $fileparam;
+if (false !== $pos && $pos > 3) {
+  $file = substr($fileparam, 0, $pos);
+  $line = substr($fileparam, $pos+1);
+}
+
+if (false === $file || !file_exists($file)) {
+  throw new \Exception('File does not exist: ' . $file);
+}
+
+if (null === $line) {
+  system($pathToNetbeansBinary .' --open ' . escapeshellarg($file). ' &');
+} else {
+  system($pathToNetbeansBinary . ' --open ' . escapeshellarg($file . ':' . $line) . ' &');
+}
