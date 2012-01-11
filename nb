@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-$pathToNetbeansBinary = '/home/robo47/netbeans-7.0.1/bin/netbeans';
+$pathToNetbeansBinary = '/home/robo47/netbeans-7.1/bin/netbeans';
 
 
 if (!file_exists($pathToNetbeansBinary)) {
