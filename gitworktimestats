@@ -1,0 +1,62 @@
+#!/usr/bin/php
+<?php
+
+// shows how many of your commits are on saturdays/sundays or outside of your worktime (9 - 18 is standard)
+
+// Number of commits
+$count = shell_exec('git log --oneline | wc -l');
+
+// log with only commitmessage and timestamp, separated by a space
+$lines = explode(PHP_EOL, shell_exec('git log --pretty=format:"%H %at"'));
+
+// I love classes, total overhead here, but who cares
+class Commit
+{
+    public $hash, $time;
+    
+    public function __construct($hash, $time) { $this->hash = $hash; $this->time = $time; }
+    
+    // Before 9 or after 18 o'clock
+    public function isOutsideWorkTime() { 
+        $time = (int)date('G', $this->time); if($time <= 9 || $time >= 18) { return true; } else { return false; } 
+    }
+    
+    // Day is sunday (0) or saturday (6)
+    public function isOnWeekend() { 
+        $time = (int)date('w', $this->time); if ($time == 0 || $time == 6) { return true; } else { return false; } 
+    }
+    
+    public static function build($line)
+    {
+        $data = explode(' ', trim($line));
+        return new Commit($data[0], $data[1]);
+    }
+}
+
+$commits = array();
+$freetimecommits = 0;
+$weekendcommits = 0;
+
+foreach($lines as $line)
+{
+    $commits[] = $commit = Commit::build($line);
+
+    if ($commit->isOnWeekend()) {
+        $weekendcommits++;
+    }
+    if ($commit->isOutsideWorkTime() && !$commit->isOnWeekend()) {
+        $freetimecommits++;
+    }
+}
+
+function my_percent($x, $y) {
+    return number_format((($x / $y) * 100), 2) . '%';
+}
+
+
+echo 'Stats: ' . PHP_EOL;
+
+echo 'Total: '; echo trim($count) . PHP_EOL;
+
+echo 'Weekend commits: ' . $weekendcommits .  ' ' . my_percent($weekendcommits, $count) . PHP_EOL;
+echo 'Freetime commits: ' . $freetimecommits .  ' ' . my_percent($freetimecommits, $count) . PHP_EOL . PHP_EOL;
