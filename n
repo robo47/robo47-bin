@@ -1,2 +1,6 @@
 #!/bin/bash
-nautilus ./ &
+# Script for opening Nautilus in the current directory without blocking the shell
+
+nemo ./ &
+
+
